@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Debuging;
-using Shooter.InputManage.ComboSystem;
+using Graphene.InputManager.ComboSystem;
+using Graphene.Utils;
 using UnityEngine;
-using Utils;
 
-namespace Shooter.InputManage
+namespace Graphene.InputManager
 {
-    public class ZeldaLikeInputDispatcher
+    public class ZeldaLikeInputDispatcher : InputSystem
     {
         public event Action<Vector2> RightStick;
         private Vector2 _rightStickDirection;
@@ -38,15 +37,7 @@ namespace Shooter.InputManage
         public bool IsRunning;
         public bool IsDeffending;
 
-        private Dictionary<ComboChecker, Action> _combos;
-
-        private Thread _inputThread;
-        private bool _blocked;
-
         private Coroutine _charge;
-
-
-        private Queue<Coroutine> _checkInputRoutine = new Queue<Coroutine>();
 
         public ZeldaLikeInputDispatcher(MonoBehaviour mono)
         {
@@ -55,17 +46,17 @@ namespace Shooter.InputManage
 
             // TrueChargedSlashCombo = Attack >> Direction + Attack >> Direction + Attack
 
-            _combos = new Dictionary<ComboChecker, Action>()
+            _comboAssembly = new Dictionary<ComboChecker, Action>()
             {
                 // Dodge
                 {
                     new ComboChecker(
-                        new[]
+                        new List<InputEvent>
                         {
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Dodge
+                                input = InputKey.Button_B
                             },
                         }
                     ),
@@ -81,14 +72,14 @@ namespace Shooter.InputManage
                 // ChargedSlash
                 {
                     new ComboChecker(
-                        new[]
+                        new List<InputEvent>
                         {
                             new InputEvent()
                             {
                                 down = true,
                                 hold = true,
                                 holdTime = 0.6f,
-                                input = InputKey.Attack
+                                input = InputKey.Button_RB
                             }
                         }
                     ),
@@ -103,24 +94,24 @@ namespace Shooter.InputManage
                 // TrueChargedSlashComboFinal
                 {
                     new ComboChecker(
-                        new[]
+                        new List<InputEvent>
                         {
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Attack
+                                input = InputKey.Button_RB
                             },
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Attack,
+                                input = InputKey.Button_RB,
                                 betweenMinTime = 0.3f,
                                 betweenMaxTime = 0.6f
                             },
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Attack,
+                                input = InputKey.Button_RB,
                                 betweenMinTime = 0.25f,
                                 betweenMaxTime = 0.6f
                             }
@@ -135,17 +126,17 @@ namespace Shooter.InputManage
                 // TrueChargedSlashCombo
                 {
                     new ComboChecker(
-                        new[]
+                        new List<InputEvent>
                         {
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Attack
+                                input = InputKey.Button_RB
                             },
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Attack,
+                                input = InputKey.Button_RB,
                                 betweenMinTime = 0.3f,
                                 betweenMaxTime = 0.6f
                             }
@@ -162,12 +153,12 @@ namespace Shooter.InputManage
                 // OverheadSlash
                 {
                     new ComboChecker(
-                        new[]
+                        new List<InputEvent>
                         {
                             new InputEvent()
                             {
                                 down = false,
-                                input = InputKey.Attack,
+                                input = InputKey.Button_RB,
                                 betweenMinTime = 1.5f
                             },
                         }
@@ -182,58 +173,58 @@ namespace Shooter.InputManage
             mono.StartCoroutine(Update());
         }
 
-        private void GetInputs()
+        protected override void GetInputs()
         {
             if (Input.GetButtonDown("Fire1"))
-                EnqueueInput(InputKey.Attack);
+                EnqueueInput(InputKey.Button_RB);
             if (Input.GetButtonUp("Fire1"))
-                EnqueueInput(InputKey.Attack, false);
+                EnqueueInput(InputKey.Button_RB, false);
 
             if (Input.GetButtonDown("Fire2"))
-                EnqueueInput(InputKey.Deffend);
+                EnqueueInput(InputKey.Button_A);
             if (Input.GetButtonUp("Fire2"))
-                EnqueueInput(InputKey.Deffend, false);
+                EnqueueInput(InputKey.Button_A, false);
 
             if (Input.GetButtonDown("Dodge"))
-                EnqueueInput(InputKey.Dodge);
+                EnqueueInput(InputKey.Button_B);
             if (Input.GetButtonUp("Dodge"))
-                EnqueueInput(InputKey.Dodge, false);
+                EnqueueInput(InputKey.Button_B, false);
 
             if (Input.GetButtonDown("Interact"))
-                EnqueueInput(InputKey.Interact);
+                EnqueueInput(InputKey.Button_Y);
             if (Input.GetButtonUp("Interact"))
-                EnqueueInput(InputKey.Interact, false);
+                EnqueueInput(InputKey.Button_Y, false);
 
             if (Input.GetButtonDown("Run"))
             {
-                EnqueueInput(InputKey.Run);
+                EnqueueInput(InputKey.Button_X);
                 IsRunning = true;
             }
             if (Input.GetButtonUp("Run"))
             {
-                EnqueueInput(InputKey.Run, false);
+                EnqueueInput(InputKey.Button_X, false);
                 IsRunning = false;
             }
             
             if (Input.GetButtonDown("Map"))
             {
-                EnqueueInput(InputKey.Map);
+                EnqueueInput(InputKey.Button_RT);
                 if (MapToggle != null) MapToggle();
             }
             if (Input.GetButtonUp("Map"))
             {
-                EnqueueInput(InputKey.Map, false);
+                EnqueueInput(InputKey.Button_RT, false);
             }
             
             if (Input.GetButtonDown("Deffend"))
             {
-                EnqueueInput(InputKey.Deffend);
+                EnqueueInput(InputKey.Button_A);
 //                 IsDeffending = true;
 //                 if (Deffend != null) Deffend(IsDeffending);
             }
             if (Input.GetButtonUp("Deffend"))
             {
-                EnqueueInput(InputKey.Deffend, false);
+                EnqueueInput(InputKey.Button_A, false);
 //                IsDeffending = false;
 //                if (Deffend != null) Deffend(IsDeffending);
             }
@@ -242,75 +233,6 @@ namespace Shooter.InputManage
             _leftStickDirection.y = Input.GetAxis("Vertical");
 
             if (LeftStick != null) LeftStick(_leftStickDirection);
-        }
-
-        private IEnumerator CheckInput(InputEvent input)
-        {
-            foreach (var combo in _combos)
-            {
-                var act = combo.Value;
-                combo.Key.CheckCombo(input, (res) =>
-                {
-                    if (res == ComboChecker.State.Fail) return;
-                    
-                    KillInputsRoutine();
-                    
-                    //if (res == ComboChecker.State.Waiting) return;
-                    
-                    act();
-                });
-
-                yield return new WaitForChangedResult();
-            }
-        }
-
-        private IEnumerator Update()
-        {
-            while (true)
-            {
-                if (_blocked)
-                {
-                    yield return new WaitForChangedResult();
-                    continue;
-                }
-
-                GetInputs();
-
-                yield return new WaitForChangedResult();
-            }
-        }
-
-        private void EnqueueInput(InputKey input, bool down = true)
-        {
-            var ipt = new InputEvent()
-            {
-                input = input,
-                down = down
-            };
-
-            // KillInputsRoutine();
-
-            _checkInputRoutine.Enqueue(GlobalCoroutineManager.Instance.StartCoroutine(CheckInput(ipt)));
-        }
-
-        private void KillInputsRoutine()
-        {
-            if (_checkInputRoutine.Count == 0) return;
-
-            for (int i = 0, n= _checkInputRoutine.Count; i < n; i++)
-            {
-                GlobalCoroutineManager.Instance.StopCoroutine(_checkInputRoutine.Dequeue());
-            }
-        }
-
-        public void UnblockInputs()
-        {
-            _blocked = false;
-        }
-
-        public void BlockInputs()
-        {
-            _blocked = true;
         }
     }
 }

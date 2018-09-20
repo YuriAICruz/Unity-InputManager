@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections;
-using Boo.Lang;
-using Debuging;
+using System.Collections.Generic;
+using Graphene.Utils;
 using UnityEngine;
-using Utils;
 
-namespace Shooter.InputManage.ComboSystem
+namespace Graphene.InputManager.ComboSystem
 {
+    [Serializable]
     public class ComboChecker
     {
-        private readonly InputEvent[] _combo;
+        public string hint;
+        public List<InputEvent> Combo;
+
+        public Action Invoke;
+        
         private static readonly float _allowedTimeBetweenButtons = 0.3f; //the amount of time allowed to press between buttons to keep combo buildup alive
 
         private InputKey _lastInput = InputKey.Null;
@@ -25,21 +29,21 @@ namespace Shooter.InputManage.ComboSystem
             Waiting
         }
 
-        public ComboChecker(InputEvent[] combo)
+        public ComboChecker(List<InputEvent> combo)
         {
-            _combo = combo;
+            Combo = combo;
         }
 
         public void CheckCombo(InputEvent input, Action<State> response)
         {
             KillHolder(response);
 
-            if (_currentIndex >= _combo.Length || Time.time > _timeLastButtonPressed + _combo[_currentIndex].betweenMaxTime)
+            if (_currentIndex >= Combo.Count || Time.time > _timeLastButtonPressed + Combo[_currentIndex].betweenMaxTime)
             {
                 _currentIndex = 0;
             }
 
-            if (Time.time < _timeLastButtonPressed + _combo[_currentIndex].betweenMinTime)
+            if (Time.time < _timeLastButtonPressed + Combo[_currentIndex].betweenMinTime)
             {
                 response(State.Fail);
                 return;
@@ -47,9 +51,9 @@ namespace Shooter.InputManage.ComboSystem
 
             if (CompareInput(input))
             {
-                if (_combo[_currentIndex].hold)
+                if (Combo[_currentIndex].hold)
                 {
-                    Hold(_combo[_currentIndex], response);
+                    Hold(Combo[_currentIndex], response);
                     return;
                 }
 
@@ -58,14 +62,14 @@ namespace Shooter.InputManage.ComboSystem
             }
             else
             {
-                if (_combo[_currentIndex].hold)
+                if (Combo[_currentIndex].hold)
                 {
                     KillHolder(response);
                     return;
                 }
             }
 
-            if (_currentIndex < _combo.Length)
+            if (_currentIndex < Combo.Count)
             {
                 response(State.Fail);
                 return;
@@ -101,7 +105,7 @@ namespace Shooter.InputManage.ComboSystem
 
         private bool CompareInput(InputEvent input)
         {
-            return _combo[_currentIndex].input == input.input && _combo[_currentIndex].down == input.down;
+            return Combo[_currentIndex].input == input.input && Combo[_currentIndex].down == input.down;
         }
     }
 }

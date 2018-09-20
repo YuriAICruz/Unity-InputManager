@@ -1,5 +1,8 @@
-﻿namespace Shooter.InputManage.ComboSystem
+﻿using System;
+
+namespace Graphene.InputManager.ComboSystem
 {
+    [Serializable]
     public class InputEvent
     {
         public InputKey input;

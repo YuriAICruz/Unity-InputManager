@@ -1,0 +1,12 @@
+{
+    "name": "Graphene.InputManagerEditor",
+    "references": [
+        "Graphene.InputManager"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

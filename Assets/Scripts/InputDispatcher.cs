@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using UnityEngine;
 
-namespace Shooter.InputManage
+namespace Graphene.InputManager
 {
     public class InputDispatcher
     {
@@ -14,8 +14,6 @@ namespace Shooter.InputManage
         private Vector2 _leftStickDirection;
         public event Action Shoot;
         public event Action Bomb;
-
-        private Thread _inputThread;
 
         public InputDispatcher(MonoBehaviour mono)
         {
