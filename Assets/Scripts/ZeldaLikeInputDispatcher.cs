@@ -29,6 +29,8 @@ namespace Graphene.InputManager
         public event Action StationaryCombo;
         public event Action StationaryComboFinal;
         
+        protected Dictionary<ComboChecker, Action> _comboAssembly;
+        
         public event Action MapToggle;
 
         public event Action<bool> Deffend;

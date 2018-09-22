@@ -13,11 +13,11 @@ namespace Graphene.InputManager
     {
         private Queue<Coroutine> _checkInputRoutine = new Queue<Coroutine>();
 
-        protected Dictionary<ComboChecker, Action> _comboAssembly;
+        //protected Dictionary<ComboChecker, Action> _comboAssembly;
 
         public event Action<Vector2> Left_Axis, Right_Axis;
 
-        private InputData _inputData;
+        protected InputData _inputData;
 
         private Coroutine _update;
 
@@ -49,21 +49,18 @@ namespace Graphene.InputManager
                 Debug.LogError("No Input Data file, please create on on 'Resources/" + path + "'\nusing Create 'InputSystem/Combo'");
                 throw new NullReferenceException();
             }
-
-            CreateComboData();
         }
-
-        protected virtual void CreateComboData()
+        
+        protected virtual void ExecuteCombo(int id)
         {
         }
 
 
         private IEnumerator CheckInput(InputEvent input)
         {
-            foreach (var combo in _comboAssembly)
+            foreach (var combo in _inputData.Inputs)
             {
-                var act = combo.Value;
-                combo.Key.CheckCombo(input, (res) =>
+                combo.CheckCombo(input, (res) =>
                 {
                     if (res == ComboChecker.State.Fail) return;
 
@@ -71,7 +68,7 @@ namespace Graphene.InputManager
 
                     //if (res == ComboChecker.State.Waiting) return;
 
-                    act();
+                    ExecuteCombo(combo.Id);
                 });
 
                 yield return new WaitForChangedResult();

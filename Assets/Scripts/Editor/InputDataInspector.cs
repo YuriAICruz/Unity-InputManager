@@ -85,6 +85,9 @@ namespace Graphene.InputManager
             DrawComboList();
             
             EditorGUI.indentLevel = _indentation;
+            
+            EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(_self);
         }
 
         private void ClearAllInputManagerEntries()
@@ -102,33 +105,6 @@ namespace Graphene.InputManager
             {
                 InputManagerUtils.AddAxis(controllerInput);
             }
-        }
-        
-        
-        public static void SetupInputManager()
-        {
-            // Add mouse definitions
-            InputManagerUtils.AddAxis(new InputManagerUtils.InputAxis() { name = "myMouseX",        sensitivity = 1f, type = InputManagerUtils.AxisType.MouseMovement, axis = 1 });
-            InputManagerUtils.AddAxis(new InputManagerUtils.InputAxis() { name = "myMouseY",        sensitivity = 1f, type = InputManagerUtils.AxisType.MouseMovement, axis = 2 });
-            InputManagerUtils.AddAxis(new InputManagerUtils.InputAxis() { name = "myScrollWheel", sensitivity = 1f, type = InputManagerUtils.AxisType.MouseMovement, axis = 3 });
-
-            // Add gamepad definitions
-            int i = 1;
-            //for (int i = 1; i <= (int)InputBind.Gamepad.Gamepad4; i++)
-            //{
-//            for (int j = 0; j <= (int)InputManagerUtils.InputBind.GamepadAxis.Axis10; j++)
-//            {
-//                InputManagerUtils.AddAxis(new InputManagerUtils.InputAxis() 
-//                { 
-//                    name = "myPad" + i + "A" + (j + 1).ToString(), 
-//                    dead = 0.2f,
-//                    sensitivity = 1f,
-//                    type = InputManagerUtils.AxisType.JoystickAxis,
-//                    axis = (j + 1),
-//                    joyNum = i,
-//                });
-//            }
-            //}
         }
 
         private void DrawComboList()
@@ -161,6 +137,8 @@ namespace Graphene.InputManager
                     EditorGUILayout.EndVertical();
                     continue;
                 }
+
+                input.Id = EditorGUILayout.IntField("Id: ", input.Id);
                 
                 EditorGUI.indentLevel++;
                 var j = 0;
@@ -252,7 +230,7 @@ namespace Graphene.InputManager
             if (_opened[j])
                 input.hint = EditorGUILayout.TextField(input.hint);
             else
-                EditorGUILayout.LabelField(input.hint, style, GUILayout.ExpandWidth(true));
+                EditorGUILayout.LabelField(input.Id + ": " +  input.hint, style, GUILayout.ExpandWidth(true));
             
             if (!_opened[j])
             {

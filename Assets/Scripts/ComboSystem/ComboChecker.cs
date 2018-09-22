@@ -22,6 +22,8 @@ namespace Graphene.InputManager.ComboSystem
         private float _timeLastButtonPressed;
         private Coroutine _holder;
 
+        public int Id;
+        
         public enum State
         {
             Fail = 0,
