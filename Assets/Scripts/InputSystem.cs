@@ -50,7 +50,7 @@ namespace Graphene.InputManager
                 throw new NullReferenceException();
             }
         }
-        
+
         protected virtual void ExecuteCombo(int id)
         {
         }
@@ -58,21 +58,25 @@ namespace Graphene.InputManager
 
         private IEnumerator CheckInput(InputEvent input)
         {
+            Debug.Log(input);
             foreach (var combo in _inputData.Inputs)
             {
-                combo.CheckCombo(input, (res) =>
-                {
-                    if (res == ComboChecker.State.Fail) return;
+                combo.CheckCombo(input, (res) => Execute(res, combo));
 
-                    KillInputsRoutine();
-
-                    //if (res == ComboChecker.State.Waiting) return;
-
-                    ExecuteCombo(combo.Id);
-                });
-
-                yield return new WaitForChangedResult();
+                // yield return new WaitForChangedResult();
             }
+            yield return null;
+        }
+
+        private void Execute(ComboChecker.State res, ComboChecker combo)
+        {
+            if (res == ComboChecker.State.Fail) return;
+
+            KillInputsRoutine();
+
+            //if (res == ComboChecker.State.Waiting) return;
+
+            ExecuteCombo(combo.Id);
         }
 
         private void KillInputsRoutine()

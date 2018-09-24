@@ -11,5 +11,10 @@ namespace Graphene.InputManager.ComboSystem
         public bool down;
         public bool hold;
         public float holdTime;
+
+        public override string ToString()
+        {
+            return "(" + input + " down:" + down + ")";
+        }
     }
 }
