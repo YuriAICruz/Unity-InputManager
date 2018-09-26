@@ -148,6 +148,11 @@ namespace Graphene.InputManager
             if (Input.GetButtonUp("Button_X"))
                 EnqueueInput(InputKey.Button_X, false);
 
+            if (Input.GetButtonDown("Button_Y"))
+                EnqueueInput(InputKey.Button_Y);
+            if (Input.GetButtonUp("Button_Y"))
+                EnqueueInput(InputKey.Button_Y, false);
+
             if (Input.GetButtonDown("Button_RB"))
                 EnqueueInput(InputKey.Button_RB);
             if (Input.GetButtonUp("Button_RB"))
