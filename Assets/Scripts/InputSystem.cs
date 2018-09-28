@@ -58,7 +58,6 @@ namespace Graphene.InputManager
 
         private IEnumerator CheckInput(InputEvent input)
         {
-            Debug.Log(input);
             foreach (var combo in _inputData.Inputs)
             {
                 combo.CheckCombo(input, (res) => Execute(res, combo));
