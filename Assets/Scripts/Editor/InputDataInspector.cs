@@ -29,8 +29,8 @@ namespace Graphene.InputManager
             new InputManagerUtils.InputAxis("Button_DPad_Horizontal", InputManagerUtils.AxisType.JoystickAxis, 6, 0),
             new InputManagerUtils.InputAxis("Right_Stick_Vertical", InputManagerUtils.AxisType.JoystickAxis, 5, 0),
             new InputManagerUtils.InputAxis("Right_Stick_Horizontal", InputManagerUtils.AxisType.JoystickAxis, 4, 0),
-            new InputManagerUtils.InputAxis("Vertical", InputManagerUtils.AxisType.JoystickAxis, 1, 0),
-            new InputManagerUtils.InputAxis("Horizontal", InputManagerUtils.AxisType.JoystickAxis, 0, 0),
+            new InputManagerUtils.InputAxis("Vertical", InputManagerUtils.AxisType.JoystickAxis, 2, 0),
+            new InputManagerUtils.InputAxis("Horizontal", InputManagerUtils.AxisType.JoystickAxis, 1, 0),
             new InputManagerUtils.InputAxis("Submit", "joystick button 0", 0),
             new InputManagerUtils.InputAxis("Cancel", "joystick button 1", 0)
         };
