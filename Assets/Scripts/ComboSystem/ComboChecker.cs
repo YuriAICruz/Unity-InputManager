@@ -13,7 +13,7 @@ namespace Graphene.InputManager.ComboSystem
         public List<InputEvent> Combo;
 
         public Action Invoke;
-        
+
         private static readonly float _allowedTimeBetweenButtons = 0.3f; //the amount of time allowed to press between buttons to keep combo buildup alive
 
         private InputKey _lastInput = InputKey.Null;
@@ -23,7 +23,7 @@ namespace Graphene.InputManager.ComboSystem
         private Coroutine _holder;
 
         public int Id;
-        
+
         public enum State
         {
             Fail = 0,
@@ -39,14 +39,20 @@ namespace Graphene.InputManager.ComboSystem
         public void CheckCombo(InputEvent input, Action<State> response)
         {
             KillHolder(response);
-
+            
             if (_currentIndex >= Combo.Count || Time.time > _timeLastButtonPressed + Combo[_currentIndex].betweenMaxTime)
             {
                 _currentIndex = 0;
             }
-
+            
+            if (Time.time < _timeLastButtonPressed)
+            {
+                _timeLastButtonPressed = Time.time - Combo[_currentIndex].betweenMinTime;
+            }
+            
             if (Time.time < _timeLastButtonPressed + Combo[_currentIndex].betweenMinTime)
             {
+                // Debug.Log("Time Fail:" + Time.time + " - " + "(" + _timeLastButtonPressed + ", " + Combo[_currentIndex].betweenMinTime + ")");
                 response(State.Fail);
                 return;
             }
@@ -58,7 +64,7 @@ namespace Graphene.InputManager.ComboSystem
                     Hold(Combo[_currentIndex], response);
                     return;
                 }
-
+                
                 _timeLastButtonPressed = Time.time;
                 _currentIndex++;
             }

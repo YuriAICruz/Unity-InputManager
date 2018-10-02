@@ -131,7 +131,7 @@ namespace Graphene.InputManager
                 _self.Inputs = new List<ComboChecker>();
 
             var count = _self.Inputs.Count - _opened.Count;
-            for (int x = _opened.Count - 1; x < count; x++)
+            for (int x = 0; x < count; x++)
             {
                 _opened.Add(false);
             }
@@ -235,17 +235,17 @@ namespace Graphene.InputManager
             GUI.enabled = true;
         }
 
-        private bool FoldButtons(int j, ComboChecker input)
+        private bool FoldButtons(int i, ComboChecker input)
         {
             EditorGUILayout.BeginHorizontal();
 
             var style = new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter};
 
-            if (_opened[j])
+            if (_opened[i])
             {
                 if (GUILayout.Button("X", GUILayout.MaxWidth(28)))
                 {
-                    RemoveInput(j);
+                    RemoveInput(i);
                     return true;
                 }
                 input.hint = EditorGUILayout.TextField(input.hint);
@@ -253,12 +253,12 @@ namespace Graphene.InputManager
             else
                 EditorGUILayout.LabelField(input.Id + ": " + input.hint, style, GUILayout.ExpandWidth(true));
 
-            if (!_opened[j])
+            if (!_opened[i])
             {
                 if (GUILayout.Button("\\/", GUILayout.MinWidth(20), GUILayout.MaxWidth(40)))
                 {
                     _dirty = true;
-                    _opened[j] = true;
+                    _opened[i] = true;
                 }
                 EditorGUILayout.EndHorizontal();
 
@@ -268,7 +268,7 @@ namespace Graphene.InputManager
             if (GUILayout.Button("/\\", GUILayout.MinWidth(20), GUILayout.MaxWidth(40)))
             {
                 _dirty = true;
-                _opened[j] = false;
+                _opened[i] = false;
             }
             EditorGUILayout.EndHorizontal();
 
