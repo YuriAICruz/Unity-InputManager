@@ -4,6 +4,7 @@ using System.Xml.Schema;
 using Graphene.InputManager.ComboSystem;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace Graphene.InputManager
 {
@@ -32,7 +33,39 @@ namespace Graphene.InputManager
             new InputManagerUtils.InputAxis("Vertical", InputManagerUtils.AxisType.JoystickAxis, 2, 0),
             new InputManagerUtils.InputAxis("Horizontal", InputManagerUtils.AxisType.JoystickAxis, 1, 0),
             new InputManagerUtils.InputAxis("Submit", "joystick button 0", 0),
-            new InputManagerUtils.InputAxis("Cancel", "joystick button 1", 0)
+            new InputManagerUtils.InputAxis("Cancel", "joystick button 1", 0),
+#if UNITY_XR
+            new InputManagerUtils.InputAxis("Vive_Thumb_L", "joystick button 8", 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_R", "joystick button 9", 0),
+            new InputManagerUtils.InputAxis("Vive_Trigger_L", "joystick button 14", 0),
+            new InputManagerUtils.InputAxis("Vive_Trigger_R", "joystick button 15", 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_Touch_L", "joystick button 16", 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_Touch_R", "joystick button 17", 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_L_Horizontal", InputManagerUtils.AxisType.JoystickAxis, 1, 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_L_Vertical", InputManagerUtils.AxisType.JoystickAxis, 2, 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_R_Horizontal", InputManagerUtils.AxisType.JoystickAxis, 4, 0),
+            new InputManagerUtils.InputAxis("Vive_Thumb_R_Vertical", InputManagerUtils.AxisType.JoystickAxis, 5, 0),
+            
+            new InputManagerUtils.InputAxis("Vive_Trigger_L_Axis", InputManagerUtils.AxisType.JoystickAxis, 9, 0),
+            new InputManagerUtils.InputAxis("Vive_Trigger_R_Axis", InputManagerUtils.AxisType.JoystickAxis, 10, 0),
+            new InputManagerUtils.InputAxis("Vive_Grip_L_Average", InputManagerUtils.AxisType.JoystickAxis, 11, 0),
+            new InputManagerUtils.InputAxis("Vive_Grip_R_Average", InputManagerUtils.AxisType.JoystickAxis, 12, 0),
+            new InputManagerUtils.InputAxis("Axis 13", InputManagerUtils.AxisType.JoystickAxis, 13, 0),
+            new InputManagerUtils.InputAxis("Axis 14", InputManagerUtils.AxisType.JoystickAxis, 14, 0),
+            new InputManagerUtils.InputAxis("Axis 15", InputManagerUtils.AxisType.JoystickAxis, 15, 0),
+            new InputManagerUtils.InputAxis("Axis 16", InputManagerUtils.AxisType.JoystickAxis, 16, 0),
+            new InputManagerUtils.InputAxis("Axis 17", InputManagerUtils.AxisType.JoystickAxis, 17, 0),
+            new InputManagerUtils.InputAxis("Axis 18", InputManagerUtils.AxisType.JoystickAxis, 18, 0),
+            new InputManagerUtils.InputAxis("Axis 19", InputManagerUtils.AxisType.JoystickAxis, 19, 0),
+            new InputManagerUtils.InputAxis("Axis 20", InputManagerUtils.AxisType.JoystickAxis, 20, 0),
+            new InputManagerUtils.InputAxis("Axis 21", InputManagerUtils.AxisType.JoystickAxis, 21, 0),
+            new InputManagerUtils.InputAxis("Axis 22", InputManagerUtils.AxisType.JoystickAxis, 22, 0),
+            new InputManagerUtils.InputAxis("Axis 23", InputManagerUtils.AxisType.JoystickAxis, 23, 0),
+            new InputManagerUtils.InputAxis("Axis 24", InputManagerUtils.AxisType.JoystickAxis, 24, 0),
+            new InputManagerUtils.InputAxis("Axis 25", InputManagerUtils.AxisType.JoystickAxis, 25, 0),
+            new InputManagerUtils.InputAxis("Axis 26", InputManagerUtils.AxisType.JoystickAxis, 26, 0),
+            new InputManagerUtils.InputAxis("Axis 27", InputManagerUtils.AxisType.JoystickAxis, 27, 0),
+#endif
         };
 
         private List<InputManagerUtils.InputAxis> _mouseKeyboardControllerInputs = new List<InputManagerUtils.InputAxis>()
@@ -67,6 +100,8 @@ namespace Graphene.InputManager
             _self = (InputData) target;
 
             _opened = new List<bool>();
+
+            SetupDefiningSymbols();
         }
 
         public override void OnInspectorGUI()
@@ -82,6 +117,10 @@ namespace Graphene.InputManager
                 GenerateInputManagerEntries();
 
             EditorGUILayout.Space();
+            
+            if (PlayerSettings.virtualRealitySupported)
+                EditorGUILayout.LabelField("VR Enabled - Add Inputs");
+            
             EditorGUILayout.Space();
 
             _indentation = EditorGUI.indentLevel;
@@ -97,6 +136,32 @@ namespace Graphene.InputManager
 
             if (_dirty)
                 OrderById();
+        }
+
+        private void SetupDefiningSymbols()
+        {
+            if (PlayerSettings.virtualRealitySupported)
+            {
+                var set = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
+                
+                Debug.Log(set.Contains("UNITY_XR"));
+                
+                if (!set.Contains("UNITY_XR"))
+                {
+                    set += ";UNITY_XR";
+                }
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, set);
+            }
+            else
+            {
+                var set = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
+                Debug.Log(set);
+                if (set.Contains("UNITY_XR"))
+                {
+                    set = set.Replace("UNITY_XR", "");
+                }
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, set);
+            }
         }
 
         private void OrderById()
