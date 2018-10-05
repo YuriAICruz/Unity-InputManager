@@ -13,6 +13,8 @@ namespace Graphene.InputManager
     {
         private Queue<Coroutine> _checkInputRoutine = new Queue<Coroutine>();
 
+        public bool debug;
+
         //protected Dictionary<ComboChecker, Action> _comboAssembly;
 
         public event Action<Vector2> Left_Axis, Right_Axis;
@@ -40,8 +42,8 @@ namespace Graphene.InputManager
                 down = down
             };
 
-            Debug.Log(ipt);
-            // KillInputsRoutine();
+            if(debug)
+                Debug.Log(ipt);
 
             _checkInputRoutine.Enqueue(GlobalCoroutineManager.Instance.StartCoroutine(CheckInput(ipt)));
         }
@@ -212,15 +214,15 @@ namespace Graphene.InputManager
             if (Input.GetButtonUp("Vive_Thumb_R"))
                 EnqueueInput(InputKey.Button_RS, false);
 
-            if (Input.GetButtonDown("Vive_Thumb_Touch_L"))
-                EnqueueInput(InputKey.Button_LB);
-            if (Input.GetButtonUp("Vive_Thumb_Touch_L"))
-                EnqueueInput(InputKey.Button_LB, false);
-
-            if (Input.GetButtonDown("Vive_Thumb_Touch_R"))
-                EnqueueInput(InputKey.Button_RB);
-            if (Input.GetButtonUp("Vive_Thumb_Touch_R"))
-                EnqueueInput(InputKey.Button_RB, false);
+//            if (Input.GetButtonDown("Vive_Thumb_Touch_L"))
+//                EnqueueInput(InputKey.Button_LB);
+//            if (Input.GetButtonUp("Vive_Thumb_Touch_L"))
+//                EnqueueInput(InputKey.Button_LB, false);
+//
+//            if (Input.GetButtonDown("Vive_Thumb_Touch_R"))
+//                EnqueueInput(InputKey.Button_RB);
+//            if (Input.GetButtonUp("Vive_Thumb_Touch_R"))
+//                EnqueueInput(InputKey.Button_RB, false);
 
             if (Thumb_L_Axis != null)
             {
@@ -262,11 +264,11 @@ namespace Graphene.InputManager
 
             if (gripR >= 1 && _lastGripR < 1)
             {
-                EnqueueInput(InputKey.Button_LB);
+                EnqueueInput(InputKey.Button_RB);
             }
             else if (gripR < 1 && _lastGripR >= 1)
             {
-                EnqueueInput(InputKey.Button_LB, false);
+                EnqueueInput(InputKey.Button_RB, false);
             }
 
             _lastGripR = gripR;
