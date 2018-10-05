@@ -119,7 +119,7 @@ namespace Graphene.InputManager
             EditorGUILayout.Space();
             
             if (PlayerSettings.virtualRealitySupported)
-                EditorGUILayout.LabelField("VR Enabled - Add Inputs");
+                EditorGUILayout.LabelField("VR Enabled - Add Inputs - Detected: " + XRDevice.model);
             
             EditorGUILayout.Space();
 
