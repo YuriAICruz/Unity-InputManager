@@ -5,6 +5,7 @@ using System.IO;
 using Graphene.InputManager.ComboSystem;
 using Graphene.Utils;
 using UnityEngine;
+using UnityEngine.Timeline;
 
 namespace Graphene.InputManager
 {
@@ -14,6 +15,9 @@ namespace Graphene.InputManager
         private Queue<Coroutine> _checkInputRoutine = new Queue<Coroutine>();
 
         public bool debug;
+
+        [Tooltip("From the Resources Folder")]
+        public string dataPath = "Input/InputData";
 
         //protected Dictionary<ComboChecker, Action> _comboAssembly;
 
@@ -52,12 +56,12 @@ namespace Graphene.InputManager
         {
             _update = GlobalCoroutineManager.Instance.StartCoroutine(Update());
 
-            var path = "Input/InputData";
+            var path = string.IsNullOrEmpty(dataPath) ? "Input/InputData" : dataPath;
             _inputData = Resources.Load<InputData>(path);
 
             if (_inputData == null)
             {
-                Debug.LogError("No Input Data file, please create on on 'Resources/" + path + "'\nusing Create 'InputSystem/Combo'");
+                Debug.LogError("No Input Data file, please create on 'Resources/" + path + ".asset'\nusing Create 'InputSystem/Combo'");
                 throw new NullReferenceException();
             }
         }
