@@ -155,7 +155,6 @@ namespace Graphene.InputManager
             else
             {
                 var set = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
-                Debug.Log(set);
                 if (set.Contains("UNITY_XR"))
                 {
                     set = set.Replace("UNITY_XR", "");
