@@ -2,10 +2,15 @@
     "name": "Graphene.InputManager",
     "references": [
         "Graphene.Utils",
-        "Graphene.UtilsEditor"
+        "Graphene.UtilsEditor",
+        "Unity.InputSystem"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
 }

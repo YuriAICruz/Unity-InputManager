@@ -5,7 +5,7 @@ using System.IO;
 using Graphene.InputManager.ComboSystem;
 using Graphene.Utils;
 using UnityEngine;
-using UnityEngine.Timeline;
+using UnityEngine.Experimental.Input;
 
 namespace Graphene.InputManager
 {
@@ -16,8 +16,7 @@ namespace Graphene.InputManager
 
         public bool debug;
 
-        [Tooltip("From the Resources Folder")]
-        public string dataPath = "Input/InputData";
+        [Tooltip("From the Resources Folder")] public string dataPath = "Input/InputData";
 
         //protected Dictionary<ComboChecker, Action> _comboAssembly;
 
@@ -46,7 +45,7 @@ namespace Graphene.InputManager
                 down = down
             };
 
-            if(debug)
+            if (debug)
                 Debug.Log(ipt);
 
             _checkInputRoutine.Enqueue(GlobalCoroutineManager.Instance.StartCoroutine(CheckInput(ipt)));
@@ -123,7 +122,7 @@ namespace Graphene.InputManager
                     continue;
                 }
 
-                GetInputs();
+                GetInputs(Gamepad.current);//TODO: get gamepads counts and players counts
 
                 yield return new WaitForChangedResult();
             }
@@ -145,8 +144,92 @@ namespace Graphene.InputManager
 //        Button_DPad_Left = 8192,
 //        Button_DPad_Right = 16384,
 
-        protected virtual void GetInputs()
+        protected virtual void GetInputs(Gamepad gamepad)
         {
+            if(gamepad == null) return;
+            
+            if (gamepad.aButton.wasPressedThisFrame || gamepad.buttonSouth.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_A);
+            if (gamepad.aButton.wasReleasedThisFrame || gamepad.buttonSouth.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_A, false);
+            
+            if (gamepad.bButton.wasPressedThisFrame || gamepad.buttonEast.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_B);
+            if (gamepad.bButton.wasReleasedThisFrame || gamepad.buttonEast.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_B, false);
+            
+            if (gamepad.xButton.wasPressedThisFrame || gamepad.buttonWest.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_X);
+            if (gamepad.xButton.wasReleasedThisFrame || gamepad.buttonWest.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_X, false);
+            
+            if (gamepad.yButton.wasPressedThisFrame || gamepad.buttonNorth.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_Y);
+            if (gamepad.yButton.wasReleasedThisFrame || gamepad.buttonNorth.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_Y, false);
+            
+            
+            if (gamepad.rightShoulder.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_RB);
+            if (gamepad.rightShoulder.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_RB, false);
+            
+            if (gamepad.rightTrigger.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_RT);
+            if (gamepad.rightTrigger.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_RT, false);
+            
+            if (gamepad.leftShoulder.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_LB);
+            if (gamepad.leftShoulder.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_LB, false);
+            
+            if (gamepad.leftTrigger.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_LT);
+            if (gamepad.leftTrigger.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_LT, false);
+            
+            
+            if (gamepad.startButton.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_Start);
+            if (gamepad.startButton.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_Start, false);
+            
+            if (gamepad.selectButton.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_Select);
+            if (gamepad.selectButton.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_Select, false);
+            
+            
+            if (gamepad.dpad.down.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Down);
+            if (gamepad.dpad.down.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Down, false);
+            
+            if (gamepad.dpad.up.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Up);
+            if (gamepad.dpad.up.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Up, false);
+            
+            if (gamepad.dpad.left.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Left);
+            if (gamepad.dpad.left.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Left, false);
+            
+            if (gamepad.dpad.right.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Right);
+            if (gamepad.dpad.right.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_DPad_Right, false);
+            
+
+            Left_Axis?.Invoke(gamepad.leftStick.ReadValue());
+            Right_Axis?.Invoke(gamepad.rightStick.ReadValue());
+            
+#if UNITY_XR
+            Debug.LogError("Not Implemented");
+#endif
+
+#if INPUT_MANAGER
             if (Input.GetButtonDown("Button_A"))
                 EnqueueInput(InputKey.Button_A);
             if (Input.GetButtonUp("Button_A"))
@@ -335,6 +418,7 @@ namespace Graphene.InputManager
             {
                 Right_Axis(new Vector2(Input.GetAxisRaw("Right_Stick_Horizontal"), Input.GetAxisRaw("Right_Stick_Vertical")));
             }
+#endif
         }
 
         public void OnDestroy()
