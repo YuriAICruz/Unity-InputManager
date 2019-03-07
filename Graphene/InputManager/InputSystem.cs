@@ -22,6 +22,8 @@ namespace Graphene.InputManager
 
         public event Action<Vector2> Left_Axis, Right_Axis;
 
+        public bool IsKeyboardMouse { get; private set; }
+
 #if UNITY_XR
         public event Action<Vector2> Thumb_L_Axis, Thumb_R_Axis;
         public event Action<float> Trigger_L_Axis, Trigger_R_Axis;
@@ -36,6 +38,9 @@ namespace Graphene.InputManager
 
         protected bool _blocked;
         private Vector2 _lastDpad;
+        private InputAction _lookAction;
+        private InputAction _moveAction;
+        private Vector2 _keyboardMove;
 
         protected void EnqueueInput(InputKey input, bool down = true)
         {
@@ -63,6 +68,50 @@ namespace Graphene.InputManager
                 Debug.LogError("No Input Data file, please create on 'Resources/" + path + ".asset'\nusing Create 'InputSystem/Combo'");
                 throw new NullReferenceException();
             }
+            
+            _lookAction = new InputAction("look", binding: "");
+            _moveAction = new InputAction("move", binding: "");
+
+            _lookAction.AddBinding("<Mouse>/delta");
+            _moveAction.AddCompositeBinding("Dpad")
+                .With("Up", "<Keyboard>/w")
+                .With("Down", "<Keyboard>/s")
+                .With("Left", "<Keyboard>/a")
+                .With("Right", "<Keyboard>/d");
+
+            _lookAction.continuous = true;
+            _moveAction.continuous = true;
+            _moveAction.performed += Left_AxisRead;
+            _lookAction.performed += Right_AxisRead;
+
+            _lookAction.Enable();
+            _moveAction.Enable();
+        }
+
+        public void DeInit()
+        {
+            if (_moveAction != null)
+            {
+                _moveAction.performed -= Left_AxisRead;
+                _moveAction.Disable();
+            }
+
+            if (_lookAction != null)
+            {
+                _lookAction.performed -= Right_AxisRead;
+                _lookAction.Disable();
+            }
+        }
+
+        private void Left_AxisRead(InputAction.CallbackContext obj)
+        {
+            _keyboardMove = obj.ReadValue<Vector2>();
+            //Left_Axis?.Invoke(obj.ReadValue<Vector2>());
+        }
+
+        private void Right_AxisRead(InputAction.CallbackContext obj)
+        {
+            //Right_Axis?.Invoke(obj.ReadValue<Vector2>());
         }
 
         protected virtual void ExecuteCombo(int id)
@@ -122,7 +171,7 @@ namespace Graphene.InputManager
                     continue;
                 }
 
-                GetInputs(Gamepad.current);//TODO: get gamepads counts and players counts
+                GetInputs(Gamepad.current); //TODO: get gamepads counts and players counts
 
                 yield return new WaitForChangedResult();
             }
@@ -144,87 +193,120 @@ namespace Graphene.InputManager
 //        Button_DPad_Left = 8192,
 //        Button_DPad_Right = 16384,
 
+        public Vector2 MousePos()
+        {
+            return Mouse.current.position.ReadValue();
+        }
+
+        private void MapKeyboardMouse(Keyboard keyboard)
+        {
+            var mouse = Mouse.current;
+            if (keyboard == null || mouse == null)
+                return;
+
+            Left_Axis?.Invoke(_keyboardMove);
+            _keyboardMove = Vector2.zero;
+            Right_Axis?.Invoke(mouse.position.ReadValue());
+            
+            if (mouse.leftButton.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_LT);
+            if (mouse.leftButton.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_LT, false);
+            
+            if (mouse.rightButton.wasPressedThisFrame)
+                EnqueueInput(InputKey.Button_RT);
+            if (mouse.rightButton.wasReleasedThisFrame)
+                EnqueueInput(InputKey.Button_RT, false);
+        }
+
         protected virtual void GetInputs(Gamepad gamepad)
         {
-            if(gamepad == null) return;
-            
+            IsKeyboardMouse = gamepad == null;
+            if (gamepad == null)
+            {
+                MapKeyboardMouse(Keyboard.current);
+
+                return;
+            }
+
+
             if (gamepad.aButton.wasPressedThisFrame || gamepad.buttonSouth.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_A);
             if (gamepad.aButton.wasReleasedThisFrame || gamepad.buttonSouth.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_A, false);
-            
+
             if (gamepad.bButton.wasPressedThisFrame || gamepad.buttonEast.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_B);
             if (gamepad.bButton.wasReleasedThisFrame || gamepad.buttonEast.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_B, false);
-            
+
             if (gamepad.xButton.wasPressedThisFrame || gamepad.buttonWest.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_X);
             if (gamepad.xButton.wasReleasedThisFrame || gamepad.buttonWest.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_X, false);
-            
+
             if (gamepad.yButton.wasPressedThisFrame || gamepad.buttonNorth.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_Y);
             if (gamepad.yButton.wasReleasedThisFrame || gamepad.buttonNorth.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_Y, false);
-            
-            
+
+
             if (gamepad.rightShoulder.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_RB);
             if (gamepad.rightShoulder.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_RB, false);
-            
+
             if (gamepad.rightTrigger.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_RT);
             if (gamepad.rightTrigger.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_RT, false);
-            
+
             if (gamepad.leftShoulder.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_LB);
             if (gamepad.leftShoulder.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_LB, false);
-            
+
             if (gamepad.leftTrigger.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_LT);
             if (gamepad.leftTrigger.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_LT, false);
-            
-            
+
+
             if (gamepad.startButton.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_Start);
             if (gamepad.startButton.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_Start, false);
-            
+
             if (gamepad.selectButton.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_Select);
             if (gamepad.selectButton.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_Select, false);
-            
-            
+
+
             if (gamepad.dpad.down.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Down);
             if (gamepad.dpad.down.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Down, false);
-            
+
             if (gamepad.dpad.up.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Up);
             if (gamepad.dpad.up.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Up, false);
-            
+
             if (gamepad.dpad.left.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Left);
             if (gamepad.dpad.left.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Left, false);
-            
+
             if (gamepad.dpad.right.wasPressedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Right);
             if (gamepad.dpad.right.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_DPad_Right, false);
-            
+
 
             Left_Axis?.Invoke(gamepad.leftStick.ReadValue());
             Right_Axis?.Invoke(gamepad.rightStick.ReadValue());
-            
+
 #if UNITY_XR
             Debug.LogError("Not Implemented");
 #endif
