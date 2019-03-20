@@ -324,10 +324,6 @@ namespace Graphene.InputManager
 
         protected virtual void GetInputs()
         {
-#if UNITY_XR
-            Debug.LogError("Not Implemented");
-#endif
-            
             if (Input.GetButtonDown("Button_A"))
                 EnqueueInput(InputKey.Button_A);
             if (Input.GetButtonUp("Button_A"))
