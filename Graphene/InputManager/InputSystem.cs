@@ -5,7 +5,10 @@ using System.IO;
 using Graphene.InputManager.ComboSystem;
 using Graphene.Utils;
 using UnityEngine;
+
+#if INPUT_SYSTEM
 using UnityEngine.Experimental.Input;
+#endif
 
 namespace Graphene.InputManager
 {
@@ -38,8 +41,10 @@ namespace Graphene.InputManager
 
         protected bool _blocked;
         private Vector2 _lastDpad;
+#if INPUT_SYSTEM
         private InputAction _lookAction;
         private InputAction _moveAction;
+#endif
         private Vector2 _keyboardMove;
 
         protected void EnqueueInput(InputKey input, bool down = true)
@@ -69,6 +74,7 @@ namespace Graphene.InputManager
                 throw new NullReferenceException();
             }
             
+#if INPUT_SYSTEM
             _lookAction = new InputAction("look", binding: "");
             _moveAction = new InputAction("move", binding: "");
 
@@ -86,32 +92,7 @@ namespace Graphene.InputManager
 
             _lookAction.Enable();
             _moveAction.Enable();
-        }
-
-        public void DeInit()
-        {
-            if (_moveAction != null)
-            {
-                _moveAction.performed -= Left_AxisRead;
-                _moveAction.Disable();
-            }
-
-            if (_lookAction != null)
-            {
-                _lookAction.performed -= Right_AxisRead;
-                _lookAction.Disable();
-            }
-        }
-
-        private void Left_AxisRead(InputAction.CallbackContext obj)
-        {
-            _keyboardMove = obj.ReadValue<Vector2>();
-            //Left_Axis?.Invoke(obj.ReadValue<Vector2>());
-        }
-
-        private void Right_AxisRead(InputAction.CallbackContext obj)
-        {
-            //Right_Axis?.Invoke(obj.ReadValue<Vector2>());
+#endif
         }
 
         protected virtual void ExecuteCombo(int id)
@@ -171,7 +152,11 @@ namespace Graphene.InputManager
                     continue;
                 }
 
+#if INPUT_SYSTEM
                 GetInputs(Gamepad.current); //TODO: get gamepads counts and players counts
+#else
+                GetInputs();
+#endif
 
                 yield return new WaitForChangedResult();
             }
@@ -193,6 +178,34 @@ namespace Graphene.InputManager
 //        Button_DPad_Left = 8192,
 //        Button_DPad_Right = 16384,
 
+#if INPUT_SYSTEM
+
+        public void DeInit()
+        {
+            if (_moveAction != null)
+            {
+                _moveAction.performed -= Left_AxisRead;
+                _moveAction.Disable();
+            }
+
+            if (_lookAction != null)
+            {
+                _lookAction.performed -= Right_AxisRead;
+                _lookAction.Disable();
+            }
+        }
+
+        private void Left_AxisRead(InputAction.CallbackContext obj)
+        {
+            _keyboardMove = obj.ReadValue<Vector2>();
+            //Left_Axis?.Invoke(obj.ReadValue<Vector2>());
+        }
+
+        private void Right_AxisRead(InputAction.CallbackContext obj)
+        {
+            //Right_Axis?.Invoke(obj.ReadValue<Vector2>());
+        }
+    
         public Vector2 MousePos()
         {
             return Mouse.current.position.ReadValue();
@@ -218,7 +231,7 @@ namespace Graphene.InputManager
             if (mouse.rightButton.wasReleasedThisFrame)
                 EnqueueInput(InputKey.Button_RT, false);
         }
-
+    
         protected virtual void GetInputs(Gamepad gamepad)
         {
             IsKeyboardMouse = gamepad == null;
@@ -306,12 +319,15 @@ namespace Graphene.InputManager
 
             Left_Axis?.Invoke(gamepad.leftStick.ReadValue());
             Right_Axis?.Invoke(gamepad.rightStick.ReadValue());
+        }
+#endif
 
+        protected virtual void GetInputs()
+        {
 #if UNITY_XR
             Debug.LogError("Not Implemented");
 #endif
-
-#if INPUT_MANAGER
+            
             if (Input.GetButtonDown("Button_A"))
                 EnqueueInput(InputKey.Button_A);
             if (Input.GetButtonUp("Button_A"))
@@ -500,7 +516,6 @@ namespace Graphene.InputManager
             {
                 Right_Axis(new Vector2(Input.GetAxisRaw("Right_Stick_Horizontal"), Input.GetAxisRaw("Right_Stick_Vertical")));
             }
-#endif
         }
 
         public void OnDestroy()

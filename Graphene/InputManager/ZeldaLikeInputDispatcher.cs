@@ -7,7 +7,6 @@ using System.Threading;
 using Graphene.InputManager.ComboSystem;
 using Graphene.Utils;
 using UnityEngine;
-using UnityEngine.Experimental.Input;
 
 namespace Graphene.InputManager
 {
@@ -176,7 +175,7 @@ namespace Graphene.InputManager
             mono.StartCoroutine(Update());
         }
 
-        protected override void GetInputs(Gamepad gamepad)
+        protected override void GetInputs()
         {
             if (Input.GetButtonDown("Fire1"))
                 EnqueueInput(InputKey.Button_RB);

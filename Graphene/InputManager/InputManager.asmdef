@@ -2,8 +2,7 @@
     "name": "Graphene.InputManager",
     "references": [
         "Graphene.Utils",
-        "Graphene.UtilsEditor",
-        "Unity.InputSystem"
+        "Graphene.UtilsEditor"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
