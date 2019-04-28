@@ -95,6 +95,12 @@ namespace Graphene.InputManager
 #endif
         }
 
+
+        public virtual void DeInit()
+        {
+            
+        }
+
         protected virtual void ExecuteCombo(int id)
         {
         }
