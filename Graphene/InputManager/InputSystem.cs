@@ -13,7 +13,7 @@ using UnityEngine.Experimental.Input;
 namespace Graphene.InputManager
 {
     [Serializable]
-    public abstract class InputSystem
+    public abstract class InputSystem : MonoBehaviour
     {
         private Queue<Coroutine> _checkInputRoutine = new Queue<Coroutine>();
 
@@ -37,9 +37,7 @@ namespace Graphene.InputManager
 
         protected InputData _inputData;
 
-        private Coroutine _update;
-
-        protected bool _blocked;
+        protected bool _blocked = true;
         private Vector2 _lastDpad;
 #if INPUT_SYSTEM
         private InputAction _lookAction;
@@ -63,8 +61,6 @@ namespace Graphene.InputManager
 
         public virtual void Init()
         {
-            _update = GlobalCoroutineManager.Instance.StartCoroutine(Update());
-
             var path = string.IsNullOrEmpty(dataPath) ? "Input/InputData" : dataPath;
             _inputData = Resources.Load<InputData>(path);
 
@@ -73,7 +69,7 @@ namespace Graphene.InputManager
                 Debug.LogError("No Input Data file, please create on 'Resources/" + path + ".asset'\nusing Create 'InputSystem/Combo'");
                 throw new NullReferenceException();
             }
-            
+
 #if INPUT_SYSTEM
             _lookAction = new InputAction("look", binding: "");
             _moveAction = new InputAction("move", binding: "");
@@ -93,13 +89,10 @@ namespace Graphene.InputManager
             _lookAction.Enable();
             _moveAction.Enable();
 #endif
+
+            UnblockInputs();
         }
 
-
-        public virtual void DeInit()
-        {
-            
-        }
 
         protected virtual void ExecuteCombo(int id)
         {
@@ -148,24 +141,15 @@ namespace Graphene.InputManager
             _blocked = true;
         }
 
-        protected IEnumerator Update()
+        private void Update()
         {
-            while (true)
-            {
-                if (_blocked)
-                {
-                    yield return new WaitForChangedResult();
-                    continue;
-                }
+            if (_blocked) return;
 
 #if INPUT_SYSTEM
-                GetInputs(Gamepad.current); //TODO: get gamepads counts and players counts
+            GetInputs(Gamepad.current); //TODO: get gamepads counts and players counts
 #else
-                GetInputs();
+            GetInputs();
 #endif
-
-                yield return new WaitForChangedResult();
-            }
         }
 
 
@@ -184,10 +168,9 @@ namespace Graphene.InputManager
 //        Button_DPad_Left = 8192,
 //        Button_DPad_Right = 16384,
 
-#if INPUT_SYSTEM
-
         public void DeInit()
         {
+#if INPUT_SYSTEM
             if (_moveAction != null)
             {
                 _moveAction.performed -= Left_AxisRead;
@@ -199,8 +182,10 @@ namespace Graphene.InputManager
                 _lookAction.performed -= Right_AxisRead;
                 _lookAction.Disable();
             }
+    #endif
         }
 
+#if INPUT_SYSTEM
         private void Left_AxisRead(InputAction.CallbackContext obj)
         {
             _keyboardMove = obj.ReadValue<Vector2>();
@@ -517,14 +502,6 @@ namespace Graphene.InputManager
             if (Right_Axis != null)
             {
                 Right_Axis(new Vector2(Input.GetAxisRaw("Right_Stick_Horizontal"), Input.GetAxisRaw("Right_Stick_Vertical")));
-            }
-        }
-
-        public void OnDestroy()
-        {
-            if (_update != null)
-            {
-                GlobalCoroutineManager.Instance.StopCoroutine(_update);
             }
         }
     }

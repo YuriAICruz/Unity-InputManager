@@ -171,8 +171,6 @@ namespace Graphene.InputManager
                     }
                 }
             };
-
-            mono.StartCoroutine(Update());
         }
 
         protected override void GetInputs()

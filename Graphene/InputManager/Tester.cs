@@ -2,13 +2,14 @@
 
 namespace Graphene.InputManager
 {
+    [RequireComponent(typeof(InputTester))]
     public class Tester : MonoBehaviour
     {
         private InputTester _input;
         
         private void Start()
         {
-            _input = new InputTester();
+            _input = GetComponent<InputTester>();
             _input.debug = true;
             _input.Init();
         }
