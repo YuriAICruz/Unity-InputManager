@@ -35,6 +35,13 @@ namespace Graphene.InputManager
             new InputManagerUtils.InputAxis("Submit", "joystick button 0", 0),
             new InputManagerUtils.InputAxis("Cancel", "joystick button 1", 0),
 #if UNITY_XR
+            new InputManagerUtils.InputAxis("Oculus_Grip_L", "joystick button 11", 0),
+            new InputManagerUtils.InputAxis("Oculus_Grip_R", "joystick button 12", 0),
+            new InputManagerUtils.InputAxis("Oculus_Index_Touch_L", "joystick button 14", 0),
+            new InputManagerUtils.InputAxis("Oculus_Index_Touch_R", "joystick button 15", 0),
+            new InputManagerUtils.InputAxis("Oculus_Trigger_L_Axis", InputManagerUtils.AxisType.JoystickAxis, 9, 0),
+            new InputManagerUtils.InputAxis("Oculus_Trigger_R_Axis", InputManagerUtils.AxisType.JoystickAxis, 10, 0),
+            
             new InputManagerUtils.InputAxis("Vive_Thumb_L", "joystick button 8", 0),
             new InputManagerUtils.InputAxis("Vive_Thumb_R", "joystick button 9", 0),
             new InputManagerUtils.InputAxis("Vive_Trigger_L", "joystick button 14", 0),

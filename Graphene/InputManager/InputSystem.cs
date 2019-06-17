@@ -15,6 +15,11 @@ namespace Graphene.InputManager
     [Serializable]
     public abstract class InputSystem : MonoBehaviour
     {
+#if UNITY_XR
+        public bool Oculus;
+        private float _lastTriggerL;
+        private float _lastTriggerR;
+#endif
         private Queue<Coroutine> _checkInputRoutine = new Queue<Coroutine>();
 
         public bool debug;
@@ -366,25 +371,65 @@ namespace Graphene.InputManager
                 EnqueueInput(InputKey.Button_A, false);
 
 #if UNITY_XR
-            if (Input.GetButtonDown("Vive_Trigger_L"))
-                EnqueueInput(InputKey.Button_LT);
-            if (Input.GetButtonUp("Vive_Trigger_L"))
-                EnqueueInput(InputKey.Button_LT, false);
+            if (Oculus)
+            {
+                var triggerL = Input.GetAxisRaw("Oculus_Trigger_L_Axis");
+                
+                if (triggerL >= 0.6f && _lastTriggerL < 0.6f)
+                {
+                    EnqueueInput(InputKey.Button_LT);
+                }
+                if (triggerL < 0.6f && _lastTriggerL >= 0.6f)
+                {
+                    EnqueueInput(InputKey.Button_LT, false);
+                }
+                
+                _lastTriggerL = triggerL;
+                
+                var triggerR = Input.GetAxisRaw("Oculus_Trigger_R_Axis");
 
-            if (Input.GetButtonDown("Vive_Trigger_R"))
-                EnqueueInput(InputKey.Button_RT);
-            if (Input.GetButtonUp("Vive_Trigger_R"))
-                EnqueueInput(InputKey.Button_RT, false);
+                if (triggerR >= 0.6f && _lastTriggerR < 0.6f)
+                {
+                    EnqueueInput(InputKey.Button_RT);
+                }
+                if (triggerR < 0.6f && _lastTriggerR >= 0.6f)
+                {
+                    EnqueueInput(InputKey.Button_RT, false);
+                }
 
-            if (Input.GetButtonDown("Vive_Thumb_L"))
-                EnqueueInput(InputKey.Button_LS);
-            if (Input.GetButtonUp("Vive_Thumb_L"))
-                EnqueueInput(InputKey.Button_LS, false);
+                _lastTriggerR = triggerR;
 
-            if (Input.GetButtonDown("Vive_Thumb_R"))
-                EnqueueInput(InputKey.Button_RS);
-            if (Input.GetButtonUp("Vive_Thumb_R"))
-                EnqueueInput(InputKey.Button_RS, false);
+                if (Input.GetButtonDown("Oculus_Grip_L"))
+                    EnqueueInput(InputKey.Button_LS);
+                if (Input.GetButtonUp("Oculus_Grip_L"))
+                    EnqueueInput(InputKey.Button_LS, false);
+
+                if (Input.GetButtonDown("Oculus_Grip_R"))
+                    EnqueueInput(InputKey.Button_RS);
+                if (Input.GetButtonUp("Oculus_Grip_R"))
+                    EnqueueInput(InputKey.Button_RS, false);
+            }
+            else
+            {
+                if (Input.GetButtonDown("Vive_Trigger_L"))
+                    EnqueueInput(InputKey.Button_LT);
+                if (Input.GetButtonUp("Vive_Trigger_L"))
+                    EnqueueInput(InputKey.Button_LT, false);
+
+                if (Input.GetButtonDown("Vive_Trigger_R"))
+                    EnqueueInput(InputKey.Button_RT);
+                if (Input.GetButtonUp("Vive_Trigger_R"))
+                    EnqueueInput(InputKey.Button_RT, false);
+
+                if (Input.GetButtonDown("Vive_Thumb_L"))
+                    EnqueueInput(InputKey.Button_LS);
+                if (Input.GetButtonUp("Vive_Thumb_L"))
+                    EnqueueInput(InputKey.Button_LS, false);
+
+                if (Input.GetButtonDown("Vive_Thumb_R"))
+                    EnqueueInput(InputKey.Button_RS);
+                if (Input.GetButtonUp("Vive_Thumb_R"))
+                    EnqueueInput(InputKey.Button_RS, false);
 
 //            if (Input.GetButtonDown("Vive_Thumb_Touch_L"))
 //                EnqueueInput(InputKey.Button_LB);
@@ -396,58 +441,59 @@ namespace Graphene.InputManager
 //            if (Input.GetButtonUp("Vive_Thumb_Touch_R"))
 //                EnqueueInput(InputKey.Button_RB, false);
 
-            if (Thumb_L_Axis != null)
-            {
-                Thumb_L_Axis(new Vector2(Input.GetAxisRaw("Vive_Thumb_L_Horizontal"), Input.GetAxisRaw("Vive_Thumb_L_Vertical")));
-            }
-            if (Thumb_R_Axis != null)
-            {
-                Thumb_R_Axis(new Vector2(Input.GetAxisRaw("Vive_Thumb_R_Horizontal"), Input.GetAxisRaw("Vive_Thumb_R_Vertical")));
-            }
+                if (Thumb_L_Axis != null)
+                {
+                    Thumb_L_Axis(new Vector2(Input.GetAxisRaw("Vive_Thumb_L_Horizontal"), Input.GetAxisRaw("Vive_Thumb_L_Vertical")));
+                }
+                if (Thumb_R_Axis != null)
+                {
+                    Thumb_R_Axis(new Vector2(Input.GetAxisRaw("Vive_Thumb_R_Horizontal"), Input.GetAxisRaw("Vive_Thumb_R_Vertical")));
+                }
 
-            if (Trigger_L_Axis != null)
-            {
-                Trigger_L_Axis(Input.GetAxisRaw("Vive_Trigger_L_Axis"));
-            }
-            if (Trigger_R_Axis != null)
-            {
-                Trigger_R_Axis(Input.GetAxisRaw("Vive_Trigger_R_Axis"));
-            }
+                if (Trigger_L_Axis != null)
+                {
+                    Trigger_L_Axis(Input.GetAxisRaw("Vive_Trigger_L_Axis"));
+                }
+                if (Trigger_R_Axis != null)
+                {
+                    Trigger_R_Axis(Input.GetAxisRaw("Vive_Trigger_R_Axis"));
+                }
 
-            var gripL = Input.GetAxisRaw("Vive_Grip_L_Average");
+                var gripL = Input.GetAxisRaw("Vive_Grip_L_Average");
 
-            if (gripL >= 1 && _lastGripL < 1)
-            {
-                EnqueueInput(InputKey.Button_LB);
-            }
-            else if (gripL < 1 && _lastGripL >= 1)
-            {
-                EnqueueInput(InputKey.Button_LB, false);
-            }
+                if (gripL >= 1 && _lastGripL < 1)
+                {
+                    EnqueueInput(InputKey.Button_LB);
+                }
+                else if (gripL < 1 && _lastGripL >= 1)
+                {
+                    EnqueueInput(InputKey.Button_LB, false);
+                }
 
-            _lastGripL = gripL;
+                _lastGripL = gripL;
 
-            if (Grip_L_Axis != null)
-            {
-                Grip_L_Axis(gripL);
-            }
+                if (Grip_L_Axis != null)
+                {
+                    Grip_L_Axis(gripL);
+                }
 
-            var gripR = Input.GetAxisRaw("Vive_Grip_R_Average");
+                var gripR = Input.GetAxisRaw("Vive_Grip_R_Average");
 
-            if (gripR >= 1 && _lastGripR < 1)
-            {
-                EnqueueInput(InputKey.Button_RB);
-            }
-            else if (gripR < 1 && _lastGripR >= 1)
-            {
-                EnqueueInput(InputKey.Button_RB, false);
-            }
+                if (gripR >= 1 && _lastGripR < 1)
+                {
+                    EnqueueInput(InputKey.Button_RB);
+                }
+                else if (gripR < 1 && _lastGripR >= 1)
+                {
+                    EnqueueInput(InputKey.Button_RB, false);
+                }
 
-            _lastGripR = gripR;
+                _lastGripR = gripR;
 
-            if (Grip_R_Axis != null)
-            {
-                Grip_R_Axis(gripR);
+                if (Grip_R_Axis != null)
+                {
+                    Grip_R_Axis(gripR);
+                }
             }
 #endif
 
