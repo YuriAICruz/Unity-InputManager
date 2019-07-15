@@ -51,6 +51,8 @@ namespace Graphene.InputManager
 #endif
         private Vector2 _keyboardMove;
 
+        [SerializeField] private bool _useMouse;
+
         protected void EnqueueInput(InputKey input, bool down = true)
         {
             var ipt = new InputEvent()
@@ -551,9 +553,19 @@ namespace Graphene.InputManager
             {
                 Left_Axis(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")));
             }
+            
             if (Right_Axis != null)
             {
-                Right_Axis(new Vector2(Input.GetAxisRaw("Right_Stick_Horizontal"), Input.GetAxisRaw("Right_Stick_Vertical")));
+                if (_useMouse)
+                {
+                    var mouse = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+
+                    Right_Axis(mouse);
+                }
+                else
+                {
+                    Right_Axis(new Vector2(Input.GetAxisRaw("Right_Stick_Horizontal"), Input.GetAxisRaw("Right_Stick_Vertical")));
+                }
             }
         }
     }

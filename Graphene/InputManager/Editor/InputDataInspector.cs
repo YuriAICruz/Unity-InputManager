@@ -96,7 +96,9 @@ namespace Graphene.InputManager
             new InputManagerUtils.InputAxis("Vertical", "w", "s"),
             new InputManagerUtils.InputAxis("Horizontal", "d", "a"),
             new InputManagerUtils.InputAxis("Submit", "d", "a"),
-            new InputManagerUtils.InputAxis("Cancel", "d", "a")
+            new InputManagerUtils.InputAxis("Cancel", "d", "a"),
+            new InputManagerUtils.InputAxis("Mouse Y", InputManagerUtils.AxisType.MouseMovement, 2, 0),
+            new InputManagerUtils.InputAxis("Mouse X", InputManagerUtils.AxisType.MouseMovement, 1, 0)
         };
 
         private List<bool> _opened;
