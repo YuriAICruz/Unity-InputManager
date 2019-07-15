@@ -33,6 +33,7 @@ namespace Graphene.InputManager
         public bool IsKeyboardMouse { get; private set; }
 
 #if UNITY_XR
+        public Vector2 Input_Thumb_L_Axis, Input_Thumb_R_Axis;
         public event Action<Vector2> Thumb_L_Axis, Thumb_R_Axis;
         public event Action<float> Trigger_L_Axis, Trigger_R_Axis;
         public event Action<float> Grip_L_Axis, Grip_R_Axis;
@@ -409,7 +410,7 @@ namespace Graphene.InputManager
                 if (Input.GetButtonUp("Oculus_Grip_R"))
                     EnqueueInput(InputKey.Button_RS, false);
             }
-            else
+            else // Vive
             {
                 if (Input.GetButtonDown("Vive_Trigger_L"))
                     EnqueueInput(InputKey.Button_LT);
@@ -441,13 +442,18 @@ namespace Graphene.InputManager
 //            if (Input.GetButtonUp("Vive_Thumb_Touch_R"))
 //                EnqueueInput(InputKey.Button_RB, false);
 
+                Input_Thumb_L_Axis = new Vector2(Input.GetAxisRaw("Vive_Thumb_L_Horizontal"), Input.GetAxisRaw("Vive_Thumb_L_Vertical"));
+                
                 if (Thumb_L_Axis != null)
                 {
-                    Thumb_L_Axis(new Vector2(Input.GetAxisRaw("Vive_Thumb_L_Horizontal"), Input.GetAxisRaw("Vive_Thumb_L_Vertical")));
+                    Thumb_L_Axis(Input_Thumb_L_Axis);
                 }
+                
+                Input_Thumb_R_Axis = new Vector2(Input.GetAxisRaw("Vive_Thumb_R_Horizontal"), Input.GetAxisRaw("Vive_Thumb_R_Vertical"));
+                
                 if (Thumb_R_Axis != null)
                 {
-                    Thumb_R_Axis(new Vector2(Input.GetAxisRaw("Vive_Thumb_R_Horizontal"), Input.GetAxisRaw("Vive_Thumb_R_Vertical")));
+                    Thumb_R_Axis(Input_Thumb_R_Axis);
                 }
 
                 if (Trigger_L_Axis != null)
