@@ -22,24 +22,19 @@ namespace Graphene.InputManager.Presentation
 
         private Binding _binding;
 
-        private ComboChecker _combo;
-
         private bool _listenersAdded;
+        private InputBinder _binder;
 
-        public void Setup(ComboChecker combo)
+        private InputKey _key;
+
+
+        public void Setup(InputKey key, InputData inputData)
         {
-            _combo = combo;
+            _key = key;
+            _binder = inputData.InputBinder;
 
-            title.text = combo.hint;
-            if (combo.Combo.Count == 1)
-            {
-                keyConsole.text = combo.Combo[0].input.ToString();
-                if (combo.Combo[0].keyboardBind != KeyCode.None)
-                    keyKeyboard.text = combo.Combo[0].keyboardBind.ToString();
-                else
-                    keyKeyboard.text = combo.Combo[0].input.ToString();
-            }
-
+            UpdateInfo();
+            
             if (!_listenersAdded)
             {
                 remapConsole.onClick.AddListener(RebindConsoleButton);
@@ -48,6 +43,18 @@ namespace Graphene.InputManager.Presentation
                 _listenersAdded = true;
             }
 
+            _binding = Binding.None;
+        }
+
+        void UpdateInfo()
+        {
+            title.text = _key.ToString();
+            
+            keyConsole.gameObject.SetActive(false);
+            remapConsole.gameObject.SetActive(false);
+            
+            keyKeyboard.text = _binder.Get(_key).ToString();
+            
             _binding = Binding.None;
         }
 
@@ -90,8 +97,8 @@ namespace Graphene.InputManager.Presentation
                 case Binding.Console:
                     break;
                 case Binding.Keyboard:
-                    _combo.Combo[0].keyboardBind = keyCode;
-                    Setup(_combo);
+                    _binder.AddOrUpdateBind(_key, keyCode);
+                    UpdateInfo();
                     break;
             }
         }

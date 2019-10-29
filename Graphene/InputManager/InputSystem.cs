@@ -115,6 +115,7 @@ namespace Graphene.InputManager
 
                 // yield return new WaitForChangedResult();
             }
+
             yield return null;
         }
 
@@ -128,6 +129,7 @@ namespace Graphene.InputManager
 
             if (debug)
                 Debug.Log($"Combo: {combo}");
+
             ExecuteCombo(combo.Id);
         }
 
@@ -192,7 +194,7 @@ namespace Graphene.InputManager
                 _lookAction.performed -= Right_AxisRead;
                 _lookAction.Disable();
             }
-    #endif
+#endif
         }
 
 #if INPUT_SYSTEM
@@ -323,57 +325,52 @@ namespace Graphene.InputManager
         }
 #endif
 
+        protected void ListenInput(string name, InputKey key)
+        {
+            if (Input.GetKeyDown(_inputData.InputBinder.Get(key)))
+                EnqueueInput(key);
+            if (Input.GetKeyUp(_inputData.InputBinder.Get(key)))
+                EnqueueInput(key, false);
+
+            if (string.IsNullOrEmpty(name)) return;
+
+            if (Input.GetButtonDown(name))
+                EnqueueInput(key);
+            if (Input.GetButtonUp(name))
+                EnqueueInput(key, false);
+        }
+
         protected virtual void GetInputs()
         {
-            if (Input.GetButtonDown("Button_A"))
-                EnqueueInput(InputKey.Button_A);
-            if (Input.GetButtonUp("Button_A"))
-                EnqueueInput(InputKey.Button_A, false);
+            ListenInput("Button_A", InputKey.Button_A);
 
-            if (Input.GetButtonDown("Button_B"))
-                EnqueueInput(InputKey.Button_B);
-            if (Input.GetButtonUp("Button_B"))
-                EnqueueInput(InputKey.Button_B, false);
+            ListenInput("Button_B", InputKey.Button_B);
 
-            if (Input.GetButtonDown("Button_X"))
-                EnqueueInput(InputKey.Button_X);
-            if (Input.GetButtonUp("Button_X"))
-                EnqueueInput(InputKey.Button_X, false);
+            ListenInput("Button_X", InputKey.Button_X);
 
-            if (Input.GetButtonDown("Button_Y"))
-                EnqueueInput(InputKey.Button_Y);
-            if (Input.GetButtonUp("Button_Y"))
-                EnqueueInput(InputKey.Button_Y, false);
+            ListenInput("Button_Y", InputKey.Button_Y);
 
-            if (Input.GetButtonDown("Button_RB"))
-                EnqueueInput(InputKey.Button_RB);
-            if (Input.GetButtonUp("Button_RB"))
-                EnqueueInput(InputKey.Button_RB, false);
+            ListenInput("Button_RB", InputKey.Button_RB);
 
-            if (Input.GetButtonDown("Button_RT"))
-                EnqueueInput(InputKey.Button_RT);
-            if (Input.GetButtonUp("Button_RT"))
-                EnqueueInput(InputKey.Button_RT, false);
+            ListenInput("Button_RT", InputKey.Button_RT);
 
-            if (Input.GetButtonDown("Button_LB"))
-                EnqueueInput(InputKey.Button_LB);
-            if (Input.GetButtonUp("Button_LB"))
-                EnqueueInput(InputKey.Button_LB, false);
+            ListenInput("Button_LB", InputKey.Button_LB);
 
-            if (Input.GetButtonDown("Button_LT"))
-                EnqueueInput(InputKey.Button_LT);
-            if (Input.GetButtonUp("Button_LT"))
-                EnqueueInput(InputKey.Button_LT, false);
+            ListenInput("Button_LT", InputKey.Button_LT);
 
-            if (Input.GetButtonDown("Button_Start"))
-                EnqueueInput(InputKey.Button_Start);
-            if (Input.GetButtonUp("Button_Start"))
-                EnqueueInput(InputKey.Button_Start, false);
+            ListenInput("Button_Start", InputKey.Button_Start);
 
-            if (Input.GetButtonDown("Button_Select"))
-                EnqueueInput(InputKey.Button_A);
-            if (Input.GetButtonUp("Button_Select"))
-                EnqueueInput(InputKey.Button_A, false);
+            ListenInput("Button_Select", InputKey.Button_Select);
+
+
+            ListenInput("", InputKey.Button_DPad_Up);
+
+            ListenInput("", InputKey.Button_DPad_Down);
+
+            ListenInput("", InputKey.Button_DPad_Left);
+
+            ListenInput("", InputKey.Button_DPad_Right);
+
 
 #if UNITY_XR
             if (Oculus)
@@ -555,7 +552,7 @@ namespace Graphene.InputManager
             {
                 Left_Axis(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")));
             }
-            
+
             if (Right_Axis != null)
             {
                 if (_useMouse)

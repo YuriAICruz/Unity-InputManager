@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using Graphene.InputManager.ComboSystem;
 using UnityEngine;
 
 namespace Graphene.InputManager.Presentation
@@ -23,13 +25,13 @@ namespace Graphene.InputManager.Presentation
 
         private void Start()
         {
-            var i = 0;
-            foreach (var combo in _inputData.Inputs)
+            var keys = Enum.GetValues(typeof(InputKey)).Cast<InputKey>().ToList();
+            for (int i = 0, n = keys.Count; i < n; i++)
             {
+                if(keys[i] == InputKey.Null) continue;
                 var cb = Instantiate(prefab, transform);
-                cb.Setup(combo);
+                cb.Setup(keys[i], _inputData);
                 cb.transform.SetSiblingIndex(i);
-                i ++;
             }
         }
     }

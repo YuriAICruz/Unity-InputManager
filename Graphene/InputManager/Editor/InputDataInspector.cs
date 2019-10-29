@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Schema;
 using Graphene.InputManager.ComboSystem;
@@ -87,6 +89,8 @@ namespace Graphene.InputManager
             new InputManagerUtils.InputAxis("Button_RT", "c", 0),
             new InputManagerUtils.InputAxis("Button_LB", "q", 0),
             new InputManagerUtils.InputAxis("Button_LT", "z", 0),
+            new InputManagerUtils.InputAxis("Button_RS", "home", 0),
+            new InputManagerUtils.InputAxis("Button_LS", "end", 0),
             new InputManagerUtils.InputAxis("Button_Start", "return", 0),
             new InputManagerUtils.InputAxis("Button_Select", "escape", 0),
             new InputManagerUtils.InputAxis("Button_DPad_Vertical", "up", "down"),
@@ -126,10 +130,10 @@ namespace Graphene.InputManager
                 GenerateInputManagerEntries();
 
             EditorGUILayout.Space();
-            
+
             if (PlayerSettings.virtualRealitySupported)
                 EditorGUILayout.LabelField("VR Enabled - Add Inputs - Detected: " + XRDevice.model);
-            
+
             EditorGUILayout.Space();
 
             _indentation = EditorGUI.indentLevel;
@@ -140,6 +144,10 @@ namespace Graphene.InputManager
 
             EditorGUI.indentLevel = _indentation;
 
+            EditorGUILayout.Space();
+
+            DrawBinds();
+
             EditorUtility.SetDirty(this);
             EditorUtility.SetDirty(_self);
 
@@ -147,18 +155,97 @@ namespace Graphene.InputManager
                 OrderById();
         }
 
+        void SetDefaultBinds()
+        {
+            for (int i = 0; i < _mouseKeyboardControllerInputs.Count; i++)
+            {
+                var key = InputKey.Null;
+                var value = KeyCode.None;
+
+                if (Enum.TryParse(_mouseKeyboardControllerInputs[i].name, out key))
+                {
+                    var textInfo = new CultureInfo("en-US", false).TextInfo;
+
+                    var str = textInfo.ToTitleCase(_mouseKeyboardControllerInputs[i].positiveButton);
+                    if (Enum.TryParse(str, out value))
+                    {
+                        _self.InputBinder.AddOrUpdateBind(key, value);
+                    }
+                }
+            }
+
+            _self.InputBinder.AddOrUpdateBind(InputKey.Button_DPad_Up, KeyCode.UpArrow);
+            _self.InputBinder.AddOrUpdateBind(InputKey.Button_DPad_Down, KeyCode.DownArrow);
+            _self.InputBinder.AddOrUpdateBind(InputKey.Button_DPad_Left, KeyCode.LeftArrow);
+            _self.InputBinder.AddOrUpdateBind(InputKey.Button_DPad_Right, KeyCode.RightArrow);
+        }
+
+        private void DrawBinds()
+        {
+            if (_self.InputBinder == null)
+            {
+                _self.InputBinder = new InputBinder();
+                _self.InputBinder.key = new List<InputKey>();
+                _self.InputBinder.value = new List<KeyCode>();
+
+                SetDefaultBinds();
+            }
+
+            EditorGUILayout.LabelField("Binds");
+
+            EditorGUILayout.Space();
+
+            var list = Enum.GetValues(typeof(InputKey)).Cast<InputKey>().ToList();
+
+            for (int i = 0, n = list.Count(); i < n; i++)
+            {
+                if (list[i] == InputKey.Null) continue;
+                EditorGUILayout.BeginHorizontal();
+                if (!_self.InputBinder.Exist(list[i]))
+                {
+                    _self.InputBinder.AddOrUpdateBind(list[i], KeyCode.None);
+                }
+
+                EditorGUI.BeginChangeCheck();
+                var keycode = EditorGUILayout.TextField(list[i].ToString(), _self.InputBinder.Get(list[i]).ToString());
+                if (EditorGUI.EndChangeCheck())
+                {
+                    var e = KeyCode.None;
+
+                    var textInfo = new CultureInfo("en-US", false).TextInfo;
+
+                    keycode = textInfo.ToTitleCase(keycode);
+                    if (Enum.TryParse(keycode, out e))
+                    {
+                        Undo.RecordObject(target, "Changed Key Bind");
+                        _self.InputBinder.AddOrUpdateBind(list[i], e);
+                        EditorUtility.SetDirty(this);
+                        EditorUtility.SetDirty(_self);
+                    }
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (GUILayout.Button("Reset to Default"))
+            {
+                SetDefaultBinds();
+            }
+        }
+
         private void SetupDefiningSymbols()
         {
             if (PlayerSettings.virtualRealitySupported)
             {
                 var set = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
-                
+
                 Debug.Log(set.Contains("UNITY_XR"));
-                
+
                 if (!set.Contains("UNITY_XR"))
                 {
                     set += ";UNITY_XR";
                 }
+
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, set);
             }
             else
@@ -168,6 +255,7 @@ namespace Graphene.InputManager
                 {
                     set = set.Replace("UNITY_XR", "");
                 }
+
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, set);
             }
         }
@@ -188,6 +276,7 @@ namespace Graphene.InputManager
             {
                 InputManagerUtils.AddAxis(controllerInput);
             }
+
             foreach (var controllerInput in _mouseKeyboardControllerInputs)
             {
                 InputManagerUtils.AddAxis(controllerInput);
@@ -226,7 +315,7 @@ namespace Graphene.InputManager
                 }
 
                 input.Id = EditorGUILayout.IntField("Id: ", input.Id);
-                
+
                 EditorGUI.indentLevel++;
                 var j = 0;
                 foreach (var inputEvent in input.Combo)
@@ -235,11 +324,13 @@ namespace Graphene.InputManager
 
                     j++;
                 }
+
                 if (GUILayout.Button("Add")) AddInputEvent(i);
                 EditorGUI.indentLevel--;
                 i++;
                 EditorGUILayout.EndVertical();
             }
+
             EditorGUI.indentLevel--;
 
             if (GUILayout.Button("Add")) AddInput();
@@ -295,6 +386,7 @@ namespace Graphene.InputManager
                 EditorGUIUtility.labelWidth = 140;
                 inputEvent.holdTime = EditorGUILayout.Slider("Duration", inputEvent.holdTime, 0, 2);
             }
+
             EditorGUILayout.EndHorizontal();
 
             EditorGUIUtility.labelWidth = width;
@@ -321,6 +413,7 @@ namespace Graphene.InputManager
                     RemoveInput(i);
                     return true;
                 }
+
                 input.hint = EditorGUILayout.TextField(input.hint);
             }
             else
@@ -333,6 +426,7 @@ namespace Graphene.InputManager
                     _dirty = true;
                     _opened[i] = true;
                 }
+
                 EditorGUILayout.EndHorizontal();
 
                 return true;
@@ -343,6 +437,7 @@ namespace Graphene.InputManager
                 _dirty = true;
                 _opened[i] = false;
             }
+
             EditorGUILayout.EndHorizontal();
 
             return false;

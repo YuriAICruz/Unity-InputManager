@@ -8,5 +8,7 @@ namespace Graphene.InputManager
     public class InputData : ScriptableObject
     {
         public List<ComboChecker> Inputs;
+
+        public InputBinder InputBinder;
     }
 }
