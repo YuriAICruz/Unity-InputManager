@@ -115,5 +115,15 @@ namespace Graphene.InputManager.ComboSystem
         {
             return Combo[_currentIndex].input == input.input && Combo[_currentIndex].down == input.down;
         }
+
+        public override string ToString()
+        {
+            var str = "";
+            for (int i = 0; i < Combo.Count; i++)
+            {
+                str += Combo[i].ToString() + ", ";
+            }
+            return $"{hint}: {str}";
+        }
     }
 }

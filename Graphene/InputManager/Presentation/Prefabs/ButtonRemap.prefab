@@ -654,8 +654,8 @@ MonoBehaviour:
   title: {fileID: 2794397562882219399}
   keyConsole: {fileID: 2794397562734266721}
   keyKeyboard: {fileID: 2794397562252256453}
-  remapConsole: {fileID: 0}
-  remapKeyboard: {fileID: 0}
+  remapConsole: {fileID: 2794397563559252443}
+  remapKeyboard: {fileID: 2794397563758423518}
 --- !u!114 &2794397563757941585
 MonoBehaviour:
   m_ObjectHideFlags: 0

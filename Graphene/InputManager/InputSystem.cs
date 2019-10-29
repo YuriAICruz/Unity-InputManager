@@ -61,8 +61,8 @@ namespace Graphene.InputManager
                 down = down
             };
 
-            if (debug)
-                Debug.Log(ipt);
+//            if (debug)
+//                Debug.Log(ipt);
 
             _checkInputRoutine.Enqueue(GlobalCoroutineManager.Instance.StartCoroutine(CheckInput(ipt)));
         }
@@ -126,6 +126,8 @@ namespace Graphene.InputManager
 
             //if (res == ComboChecker.State.Waiting) return;
 
+            if (debug)
+                Debug.Log($"Combo: {combo}");
             ExecuteCombo(combo.Id);
         }
 
