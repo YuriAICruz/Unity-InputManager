@@ -557,6 +557,7 @@ namespace Graphene.InputManager
             {
                 if (_useMouse)
                 {
+                    Cursor.visible = false;
                     var mouse = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 
                     Right_Axis(mouse);
